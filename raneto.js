@@ -1,12 +1,13 @@
-var path = require('path'),
-	fs = require('fs'),
-	glob = require('glob'),
-	_ = require('underscore'),
-	_s = require('underscore.string'),
-	moment = require('moment'),
-	marked = require('marked'),
-	lunr = require('lunr'),
-	validator = require('validator');
+var _ = require('underscore'),
+    _s = require('underscore.string'),
+    fs = require('fs'),
+    glob = require('glob'),
+    lunr = require('lunr'),
+    marked = require('marked'),
+    moment = require('moment'),
+    path = require('path'),
+    validator = require('validator')
+;
 
 var raneto = {
 
@@ -53,7 +54,8 @@ var raneto = {
 	// Get meta information from Markdown content
 	processMeta: function(markdownContent) {
 		var metaArr = markdownContent.match(raneto._metaRegex),
-			meta = {};
+		    meta = {}
+		;
 
 		var metaString = metaArr ? metaArr[1].trim() : '';
 		if(metaString){
@@ -85,7 +87,8 @@ var raneto = {
 	getPage: function(filePath) {
 		try {
 			var file = fs.readFileSync(filePath),
-				slug = filePath.replace(raneto.config.content_dir, '').trim();
+			    slug = filePath.replace(raneto.config.content_dir, '').trim()
+			;
 
 			if(slug.indexOf('index.md') > -1){
 				slug = slug.replace('index.md', '');
@@ -93,7 +96,8 @@ var raneto = {
 			slug = slug.replace('.md', '').trim();
 
 			var meta = raneto.processMeta(file.toString('utf-8')),
-				content = raneto.stripMeta(file.toString('utf-8'));
+			    content = raneto.stripMeta(file.toString('utf-8'))
+			;
 			content = raneto.processVars(content);
 			var html = marked(content);
 
@@ -114,9 +118,10 @@ var raneto = {
 	getPages: function(activePageSlug) {
 		activePageSlug = activePageSlug || '';
 		var page_sort_meta = raneto.config.page_sort_meta || '',
-			category_sort = raneto.config.category_sort || false,
-			files = glob.sync(raneto.config.content_dir +'**/*'),
-			filesProcessed = [];
+		    category_sort = raneto.config.category_sort || false,
+		    files = glob.sync(raneto.config.content_dir +'**/*'),
+		    filesProcessed = []
+		;
 
 		filesProcessed.push({
 			slug: '.',
@@ -128,8 +133,9 @@ var raneto = {
 		});
 
 		files.forEach(function(filePath){
-            var shortPath = filePath.replace(raneto.config.content_dir, '').trim(),
-				stat = fs.lstatSync(filePath);
+			var shortPath = filePath.replace(raneto.config.content_dir, '').trim(),
+			    stat = fs.lstatSync(filePath)
+			;
 
 			if(stat.isSymbolicLink()) {
 				stat = fs.lstatSync(fs.readlinkSync(filePath));
@@ -166,8 +172,9 @@ var raneto = {
 			if(stat.isFile() && path.extname(shortPath) == '.md'){
 				try {
 					var file = fs.readFileSync(filePath),
-						slug = shortPath,
-						pageSort = 0;
+					    slug = shortPath,
+					    pageSort = 0
+					;
 
 					if(shortPath.indexOf('index.md') > -1){
 						slug = slug.replace('index.md', '');
@@ -175,7 +182,8 @@ var raneto = {
 					slug = slug.replace('.md', '').trim();
 
 					var dir = path.dirname(shortPath),
-						meta = raneto.processMeta(file.toString('utf-8'));
+					    meta = raneto.processMeta(file.toString('utf-8'))
+					;
 
 					if(page_sort_meta && meta[page_sort_meta]) pageSort = parseInt(meta[page_sort_meta], 10);
 
@@ -203,8 +211,8 @@ var raneto = {
 
 	// Index and search contents
 	doSearch: function(query) {
-		var files = glob.sync(raneto.config.content_dir +'**/*.md');
-		var idx = lunr(function(){
+		var files = glob.sync(raneto.config.content_dir +'**/*.md'),
+		    idx = lunr(function(){
 			this.field('title', { boost: 10 });
 			this.field('body');
 		});
@@ -212,7 +220,8 @@ var raneto = {
 		files.forEach(function(filePath){
 			try {
 				var shortPath = filePath.replace(raneto.config.content_dir, '').trim(),
-					file = fs.readFileSync(filePath);
+				    file = fs.readFileSync(filePath)
+				;
 
 				var meta = raneto.processMeta(file.toString('utf-8'));
 				idx.add({
@@ -227,12 +236,13 @@ var raneto = {
 		});
 
 		var results = idx.search(query),
-			searchResults = [];
+		    searchResults = []
+		;
 		results.forEach(function(result){
-            var page = raneto.getPage(raneto.config.content_dir + result.ref);
-            page.excerpt = page.excerpt.replace(new RegExp('('+ query +')', 'gim'), '<span class="search-query">$1</span>');
-            searchResults.push(page);
-        });
+			var page = raneto.getPage(raneto.config.content_dir + result.ref);
+			page.excerpt = page.excerpt.replace(new RegExp('('+ query +')', 'gim'), '<span class="search-query">$1</span>');
+			searchResults.push(page);
+		});
 
 		return searchResults;
 	}
