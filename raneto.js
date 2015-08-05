@@ -5,6 +5,7 @@ var _ = require('underscore'),
     lunr = require('lunr'),
     marked = require('marked'),
     moment = require('moment'),
+    nconf = require('nconf'),
     path = require('path'),
     validator = require('validator')
 ;
@@ -142,23 +143,14 @@ var raneto = {
 			}
 
 			if(stat.isDirectory()){
-				var sort = 0;
+				var properties = nconf.use('file', { file: raneto.config.content_dir + shortPath +'/.properties' }).load(),
+				    sort = 0
+				;
 
 				//ignore directories that has an ignore file under it
-				var ignoreFile = raneto.config.content_dir + shortPath +'/ignore';
-				if (fs.existsSync(ignoreFile) && fs.lstatSync(ignoreFile).isFile()) {
-					return true;
-				}
-
-				if(category_sort){
-					try {
-						var sortFile = fs.readFileSync(raneto.config.content_dir + shortPath +'/sort');
-						sort = parseInt(sortFile.toString('utf-8'), 10);
-					}
-					catch(e){
-						if(raneto.config.debug) console.log(e);
-					}
-				}
+				if (properties.ignore) return true;
+			
+				if (category_sort && properties.sort) sort = parseInt(properties.sort, 10);
 
 				filesProcessed.push({
 					slug: shortPath,
