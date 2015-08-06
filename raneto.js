@@ -28,6 +28,8 @@ var raneto = {
 		category_sort: true,
 		// Specify the path of your content folder where all your '.md' files are located
 		content_dir: './content/',
+		// For multi-sites or multi-languages
+		base_dir: '.',
 		// Toggle debug logging
 		debug: false
 	},
@@ -120,12 +122,12 @@ var raneto = {
 		activePageSlug = activePageSlug || '';
 		var page_sort_meta = raneto.config.page_sort_meta || '',
 		    category_sort = raneto.config.category_sort || false,
-		    files = glob.sync(raneto.config.content_dir +'**/*'),
+		    files = glob.sync(raneto.config.content_dir + raneto.config.base_dir + '/**/*'),
 		    filesProcessed = []
 		;
 
 		filesProcessed.push({
-			slug: '.',
+			slug: raneto.config.base_dir,
 			title: '',
 			is_index: true,
 			class: 'category-index',
