@@ -205,7 +205,7 @@ var raneto = {
 
 	// Index and search contents
 	doSearch: function(query) {
-		var files = glob.sync(raneto.config.content_dir +'**/*.md'),
+		var files = glob.sync(raneto.config.content_dir + raneto.config.base_dir + '/**/*.md'),
 		    idx = lunr(function(){
 			this.field('title', { boost: 10 });
 			this.field('body');
